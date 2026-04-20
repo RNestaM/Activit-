@@ -1,141 +1,133 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activités</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@500;600&display=swap');
-
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --rose:#fff0f3;--rose2:#ffd6e0;--rose3:#ffb3c6;--rose4:#ff85a1;
-    --red:#e63946;--red2:#c1121f;--dark:#2d1b20;--mid:#7c3d4e;
-    --light:#fff8f9;--card:#ffffff;--border:#fce4e8;
-    --text:#2d1b20;--muted:#9e6b78;
-  }
-  body{font-family:'DM Sans',sans-serif;background:var(--rose);color:var(--text);min-height:100vh}
-
-  .app{max-width:480px;margin:0 auto;padding:0 0 80px}
-
-  /* NAV */
-  .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-  .logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--red);font-weight:600}
-  .logo span{color:var(--mid);font-size:13px;font-weight:400;display:block;font-family:'DM Sans',sans-serif}
-
-  /* BOTTOM NAV */
-  .botnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100}
-  .botnav button{flex:1;padding:12px 4px 14px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;transition:color .2s}
-  .botnav button.active{color:var(--red)}
-  .botnav button svg{width:22px;height:22px}
-
-  /* FAB */
-  .fab{position:fixed;bottom:72px;right:calc(50% - 240px + 16px);width:52px;height:52px;background:var(--red);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(230,57,70,.4);z-index:101;transition:transform .2s}
-  .fab:active{transform:scale(.92)}
-  .fab svg{width:24px;height:24px;stroke:white;fill:none}
-
-  /* PAGES */
-  .page{display:none;padding:20px}
-  .page.active{display:block}
-
-  /* SECTION TITLE */
-  .sec-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--dark);margin-bottom:16px;font-weight:500}
-
-  /* STATS CARDS */
-  .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
-  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
-  .stat-card .val{font-size:28px;font-weight:600;color:var(--red);line-height:1}
-  .stat-card .lbl{font-size:12px;color:var(--muted);margin-top:4px}
-  .stat-card.wide{grid-column:1/-1}
-
-  /* CALENDAR */
-  .cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:20px}
-  .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .cal-header h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500}
-  .cal-nav{background:none;border:none;cursor:pointer;color:var(--mid);font-size:18px;padding:4px 8px}
-  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-  .cal-day-name{text-align:center;font-size:10px;color:var(--muted);padding:4px 0;font-weight:500}
-  .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:50%;cursor:pointer;transition:background .15s}
-  .cal-day.has-activity{background:var(--rose2);color:var(--red2);font-weight:600}
-  .cal-day.today{background:var(--red);color:white;font-weight:600}
-  .cal-day.other-month{color:var(--border)}
-
-  /* ACTIVITY LIST */
-  .act-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .2s}
-  .act-item:active{border-color:var(--rose4)}
-  .act-item-header{display:flex;justify-content:space-between;align-items:flex-start}
-  .act-item-date{font-size:11px;color:var(--muted)}
-  .act-item-title{font-weight:500;font-size:15px;margin-bottom:4px}
-  .act-item-games{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-  .game-pill{background:var(--rose);border:1px solid var(--rose3);color:var(--mid);font-size:11px;padding:3px 9px;border-radius:20px}
-  .game-pill.final{background:var(--red);border-color:var(--red);color:white;font-weight:500}
-  .delete-btn{background:none;border:none;cursor:pointer;color:var(--rose4);font-size:18px;padding:0 0 0 8px;line-height:1}
-
-  /* MODAL OVERLAY */
-  .overlay{position:fixed;inset:0;background:rgba(45,27,32,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
-  .overlay.open{opacity:1;pointer-events:all}
-  .modal{background:var(--light);border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .3s}
-  .overlay.open .modal{transform:translateY(0)}
-  .modal-title{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:20px;color:var(--dark)}
-  .modal-close{float:right;background:var(--rose2);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
-  label{font-size:13px;color:var(--muted);display:block;margin-bottom:5px;margin-top:14px}
-  input[type=text],input[type=date],textarea{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--card);color:var(--text)}
-  input:focus,textarea:focus{outline:none;border-color:var(--rose4)}
-  .btn-primary{width:100%;padding:14px;background:var(--red);color:white;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-top:20px}
-  .btn-secondary{width:100%;padding:12px;background:var(--rose);color:var(--red);border:1px solid var(--rose3);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px}
-
-  /* GAMES CONFIG */
-  .game-config-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
-  .game-config-item input{flex:1;border:none;background:transparent;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text)}
-  .game-config-item input:focus{outline:none}
-  .remove-game{background:none;border:none;cursor:pointer;color:var(--rose4);font-size:20px;line-height:1}
-  .add-game-btn{background:var(--rose);border:1px dashed var(--rose3);border-radius:12px;padding:11px;width:100%;color:var(--mid);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;margin-bottom:16px}
-
-  /* GAME SELECT IN ACTIVITY */
-  .game-select-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-  .game-select-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer;transition:border-color .2s}
-  .game-select-item.selected{border-color:var(--rose4);background:var(--rose)}
-  .game-select-item.is-final{border-color:var(--red);background:#fff0f3}
-  .game-select-item .gname{flex:1;font-size:14px}
-  .final-badge{background:var(--red);color:white;font-size:10px;padding:2px 7px;border-radius:10px}
-  .final-toggle{background:none;border:1px solid var(--rose3);border-radius:8px;font-size:11px;color:var(--mid);padding:3px 8px;cursor:pointer;transition:all .2s}
-  .final-toggle.active{background:var(--red);border-color:var(--red);color:white}
-
-  /* STATS CHART */
-  .chart-bar-wrap{margin-bottom:20px}
-  .chart-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-  .chart-label{font-size:12px;color:var(--muted);width:80px;text-align:right;flex-shrink:0}
-  .chart-bar-bg{flex:1;background:var(--rose2);border-radius:4px;height:18px;overflow:hidden}
-  .chart-bar{height:100%;background:var(--rose4);border-radius:4px;transition:width .4s}
-  .chart-val{font-size:12px;color:var(--mid);width:24px;flex-shrink:0}
-
-  /* LOADING */
-  .loading{text-align:center;padding:40px;color:var(--muted);font-size:14px}
-  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
-  .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}
-  .empty p{font-size:14px}
-
-  /* DETAIL VIEW */
-  .detail-header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
-  .back-btn{background:none;border:none;color:var(--mid);cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px;margin-bottom:16px;padding:0;font-family:'DM Sans',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#fff0f3;--rose2:#ffd6e0;--rose3:#ffb3c6;--rose4:#ff85a1;
+  --red:#e63946;--red2:#c1121f;--dark:#2d1b20;--mid:#7c3d4e;
+  --light:#fff8f9;--card:#ffffff;--border:#fce4e8;
+  --text:#2d1b20;--muted:#9e6b78;
+}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--rose);color:var(--text);min-height:100vh}
+.app{max-width:480px;margin:0 auto;padding:0 0 80px}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-family:Georgia,serif;font-size:19px;color:var(--red);font-weight:600}
+.logo span{color:var(--muted);font-size:11px;font-weight:400;display:block;font-family:system-ui,sans-serif}
+.botnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100}
+.botnav button{flex:1;padding:10px 2px 13px;background:none;border:none;cursor:pointer;font-size:10px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;transition:color .2s;font-family:system-ui,sans-serif}
+.botnav button.active{color:var(--red)}
+.botnav button svg{width:20px;height:20px}
+.fab{position:fixed;bottom:68px;right:calc(50% - 240px + 14px);width:50px;height:50px;background:var(--red);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(230,57,70,.4);z-index:101;transition:transform .18s}
+.fab:active{transform:scale(.9)}
+.fab svg{width:22px;height:22px;stroke:white;fill:none;stroke-width:2.5}
+.page{display:none;padding:18px}
+.page.active{display:block}
+.sec-title{font-family:Georgia,serif;font-size:20px;color:var(--dark);margin-bottom:14px;font-weight:500;margin-top:4px}
+.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:18px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px}
+.stat-card .val{font-size:26px;font-weight:600;color:var(--red);line-height:1}
+.stat-card .lbl{font-size:11px;color:var(--muted);margin-top:4px}
+.stat-card.wide{grid-column:1/-1}
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:14px;margin-bottom:18px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-header h3{font-size:15px;font-weight:500}
+.cal-nav{background:none;border:none;cursor:pointer;color:var(--mid);font-size:17px;padding:3px 7px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day-name{text-align:center;font-size:10px;color:var(--muted);padding:3px 0;font-weight:500}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;border-radius:50%}
+.cal-day.has-activity{background:var(--rose2);color:#c1121f;font-weight:600}
+.cal-day.today{background:var(--red);color:white;font-weight:600}
+.cal-day.other-month{color:var(--border)}
+.act-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 15px;margin-bottom:9px}
+.act-item-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.act-item-date{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.moment-badge{font-size:10px;padding:2px 7px;border-radius:9px;font-weight:500}
+.badge-matin{background:#fff8e1;color:#92400e}
+.badge-aprem{background:#e8f5e9;color:#1b5e20}
+.badge-soir{background:#e8eaf6;color:#1a237e}
+.badge-nuit{background:#2d1b69;color:#c4b5fd}
+.act-item-title{font-weight:500;font-size:14px;margin:3px 0 6px}
+.player-block{margin-top:7px;border-top:1px solid var(--border);padding-top:7px}
+.player-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:5px}
+.player-avatar{width:26px;height:26px;border-radius:50%;background:var(--rose2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--mid);flex-shrink:0;margin-top:1px}
+.player-name-sm{font-size:12px;font-weight:500;color:var(--dark)}
+.act-item-games{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.game-pill{background:var(--rose);border:1px solid var(--rose3);color:var(--mid);font-size:10px;padding:2px 8px;border-radius:18px}
+.game-pill.final{background:var(--red);border-color:var(--red);color:white;font-weight:500}
+.delete-btn{background:none;border:none;cursor:pointer;color:var(--rose4);font-size:16px;padding:0 0 0 6px;line-height:1;flex-shrink:0}
+.overlay{position:fixed;inset:0;background:rgba(45,27,32,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--light);border-radius:22px 22px 0 0;padding:22px 18px 36px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;transform:translateY(100%);transition:transform .28s}
+.overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:Georgia,serif;font-size:19px;margin-bottom:18px;color:var(--dark)}
+.modal-close{float:right;background:var(--rose2);border:none;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--mid)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;margin-top:13px}
+input[type=text],input[type=date]{width:100%;padding:10px 13px;border:1px solid var(--border);border-radius:10px;font-family:system-ui,sans-serif;font-size:14px;background:var(--card);color:var(--text)}
+input:focus{outline:none;border-color:var(--rose4)}
+.btn-primary{width:100%;padding:13px;background:var(--red);color:white;border:none;border-radius:11px;font-family:system-ui,sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:18px}
+.btn-secondary{width:100%;padding:11px;background:var(--rose);color:var(--red);border:1px solid var(--rose3);border-radius:11px;font-family:system-ui,sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:7px}
+.moment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:6px}
+.moment-btn{padding:11px 6px;border-radius:11px;border:2px solid transparent;cursor:pointer;font-size:13px;font-weight:500;text-align:center;transition:border-color .15s;font-family:system-ui,sans-serif}
+.moment-btn.matin{background:#fff8e1;color:#92400e}
+.moment-btn.aprem{background:#e8f5e9;color:#1b5e20}
+.moment-btn.soir{background:#e8eaf6;color:#1a237e}
+.moment-btn.nuit{background:#2d1b69;color:#c4b5fd}
+.moment-btn.selected{border-color:var(--red)}
+.player-select-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
+.player-chip{padding:7px 12px;background:var(--card);border:1.5px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;font-weight:500;color:var(--dark);display:flex;align-items:center;gap:5px;transition:all .15s}
+.player-chip.selected{background:var(--rose2);border-color:var(--rose4);color:var(--red2)}
+.player-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-top:10px}
+.player-section-name{font-size:13px;font-weight:500;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.psav{width:22px;height:22px;border-radius:50%;background:var(--rose2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--mid)}
+.game-check-list{display:flex;flex-direction:column;gap:6px}
+.game-check-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--rose);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;transition:border-color .15s}
+.game-check-item.sel{background:var(--rose2);border-color:var(--rose4)}
+.game-check-item.is-final{background:#fff0f3;border-color:var(--red)}
+.game-check-name{flex:1;font-size:13px}
+.final-btn{font-size:10px;padding:3px 8px;border-radius:8px;border:1px solid var(--rose3);background:none;color:var(--muted);cursor:pointer;font-family:system-ui,sans-serif;transition:all .15s}
+.final-btn.on{background:var(--red);border-color:var(--red);color:white}
+.game-config-item{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px}
+.game-config-item input{flex:1;border:none;background:transparent;font-size:13px;font-family:system-ui,sans-serif;color:var(--text)}
+.game-config-item input:focus{outline:none}
+.remove-btn{background:none;border:none;cursor:pointer;color:var(--rose4);font-size:18px;line-height:1}
+.add-btn{background:var(--rose);border:1px dashed var(--rose3);border-radius:11px;padding:10px;width:100%;color:var(--mid);font-family:system-ui,sans-serif;font-size:13px;cursor:pointer;margin-bottom:14px}
+.player-config-item{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:10px 13px;margin-bottom:7px;display:flex;align-items:center;gap:9px}
+.player-config-item input{flex:1;border:none;background:transparent;font-size:13px;font-family:system-ui,sans-serif;color:var(--text)}
+.player-config-item input:focus{outline:none}
+.default-toggle{font-size:10px;padding:3px 8px;border-radius:8px;border:1px solid var(--rose3);background:none;color:var(--muted);cursor:pointer;font-family:system-ui,sans-serif;white-space:nowrap}
+.default-toggle.on{background:var(--red);border-color:var(--red);color:white}
+.chart-bar-wrap{margin-bottom:16px}
+.chart-row{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.chart-label{font-size:11px;color:var(--muted);width:80px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chart-bar-bg{flex:1;background:var(--rose2);border-radius:4px;height:16px;overflow:hidden}
+.chart-bar{height:100%;background:var(--rose4);border-radius:4px;transition:width .4s}
+.chart-val{font-size:11px;color:var(--mid);width:24px;flex-shrink:0;text-align:right}
+.loading{text-align:center;padding:36px;color:var(--muted);font-size:13px}
+.empty{text-align:center;padding:36px 18px;color:var(--muted)}
+.empty p{font-size:13px}
+.sec-sub{font-size:13px;font-weight:500;color:var(--dark);margin:14px 0 8px}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
-    <div class="logo">Activités <span>Suivi & statistiques</span></div>
+    <div class="logo">Activités <span>Suivi &amp; statistiques</span></div>
     <div style="font-size:11px;color:var(--muted)" id="sync-status">⏳ Connexion...</div>
   </div>
 
   <!-- PAGES -->
   <div class="page active" id="page-home">
-    <p class="sec-title" style="margin-top:20px">Tableau de bord</p>
-    <div class="stats-grid" id="stats-grid">
+    <p class="sec-title">Tableau de bord</p>
+    <div class="stats-grid">
       <div class="stat-card"><div class="val" id="s-total">–</div><div class="lbl">Activités totales</div></div>
       <div class="stat-card"><div class="val" id="s-week">–</div><div class="lbl">Cette semaine</div></div>
       <div class="stat-card"><div class="val" id="s-month">–</div><div class="lbl">Ce mois</div></div>
       <div class="stat-card"><div class="val" id="s-year">–</div><div class="lbl">Cette année</div></div>
-      <div class="stat-card wide" id="s-avgcard"><div class="val" id="s-avg">–</div><div class="lbl">Jeux moyens par activité</div></div>
+      <div class="stat-card wide"><div class="val" id="s-avg">–</div><div class="lbl">Jeux moyens par activité</div></div>
     </div>
     <div class="cal-wrap">
       <div class="cal-header">
@@ -149,20 +141,24 @@
   </div>
 
   <div class="page" id="page-list">
-    <p class="sec-title" style="margin-top:20px">Mes activités</p>
+    <p class="sec-title">Mes activités</p>
     <div id="activity-list"><div class="loading">Chargement...</div></div>
   </div>
 
   <div class="page" id="page-stats">
-    <p class="sec-title" style="margin-top:20px">Statistiques</p>
+    <p class="sec-title">Statistiques</p>
     <div id="stats-detail"><div class="loading">Chargement...</div></div>
   </div>
 
   <div class="page" id="page-config">
-    <p class="sec-title" style="margin-top:20px">Configurer les jeux</p>
+    <p class="sec-title">Configuration</p>
+    <p class="sec-sub">Jeux</p>
     <div id="games-list"></div>
-    <button class="add-game-btn" id="add-game-btn">+ Ajouter un jeu</button>
-    <button class="btn-primary" id="save-games-btn">Enregistrer</button>
+    <button class="add-btn" id="add-game-btn">+ Ajouter un jeu</button>
+    <p class="sec-sub">Joueurs</p>
+    <div id="players-list"></div>
+    <button class="add-btn" id="add-player-btn">+ Ajouter un joueur</button>
+    <button class="btn-primary" id="save-config-btn">Enregistrer la configuration</button>
   </div>
 
   <!-- BOTTOM NAV -->
@@ -181,13 +177,13 @@
     </button>
     <button onclick="showPage('config',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      Jeux
+      Config
     </button>
   </nav>
 
   <!-- FAB -->
   <button class="fab" onclick="openNewActivity()">
-    <svg viewBox="0 0 24 24" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 
   <!-- MODAL NOUVELLE ACTIVITE -->
@@ -199,9 +195,16 @@
       <input type="date" id="act-date">
       <label>Note (optionnel)</label>
       <input type="text" id="act-note" placeholder="Ex: soirée famille...">
-      <label>Jeux joués</label>
-      <div class="game-select-list" id="game-select-list"></div>
-      <p style="font-size:11px;color:var(--muted);margin-top:8px">Appuyez sur "Final" pour marquer le jeu final de la soirée</p>
+      <label>Moment de la journée</label>
+      <div class="moment-grid">
+        <button class="moment-btn matin" onclick="selectMoment('matin',this)">☀️ Matin</button>
+        <button class="moment-btn aprem" onclick="selectMoment('aprem',this)">🌤 Après-midi</button>
+        <button class="moment-btn soir" onclick="selectMoment('soir',this)">🌆 Soir</button>
+        <button class="moment-btn nuit" onclick="selectMoment('nuit',this)">🌙 Nuit</button>
+      </div>
+      <label>Joueurs participants</label>
+      <div class="player-select-grid" id="player-select-grid"></div>
+      <div id="players-games-section"></div>
       <button class="btn-primary" onclick="saveActivity()">Enregistrer l'activité</button>
       <button class="btn-secondary" onclick="closeModal('modal-activity')">Annuler</button>
     </div>
@@ -211,29 +214,38 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig={apiKey:"AIzaSyCH-z6ejXYpFhiglNSrEZh5RLgUke6OSGs",authDomain:"activite-76387.firebaseapp.com",projectId:"activite-76387",storageBucket:"activite-76387.firebasestorage.app",messagingSenderId:"353796913570",appId:"1:353796913570:web:461fe3bcf74b49a710dafb"};
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
+firebase.initializeApp({
+  apiKey:"AIzaSyCH-z6ejXYpFhiglNSrEZh5RLgUke6OSGs",
+  authDomain:"activite-76387.firebaseapp.com",
+  projectId:"activite-76387",
+  storageBucket:"activite-76387.firebasestorage.app",
+  messagingSenderId:"353796913570",
+  appId:"1:353796913570:web:461fe3bcf74b49a710dafb"
+});
+const db = firebase.firestore();
 
-let games=[];
-let activities=[];
-let calYear=new Date().getFullYear();
-let calMonth=new Date().getMonth();
-let selectedGames={};// {gameId: true/false(selected), final: bool}
+let games=[], players=[], activities=[];
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+let selectedMoment='soir';
+let selectedPlayers={};
+let playerGames={};
 
-// ---- FIREBASE LOAD ----
 async function loadAll(){
   try{
-    const gSnap=await db.collection('games').orderBy('order').get();
-    games=gSnap.docs.map(d=>({id:d.id,...d.data()}));
+    const [gSnap,pSnap,aSnap] = await Promise.all([
+      db.collection('games').orderBy('order').get(),
+      db.collection('players').orderBy('order').get(),
+      db.collection('activities').orderBy('date','desc').get()
+    ]);
+    games = gSnap.docs.map(d=>({id:d.id,...d.data()}));
+    players = pSnap.docs.map(d=>({id:d.id,...d.data()}));
+    activities = aSnap.docs.map(d=>({id:d.id,...d.data()}));
     if(games.length===0){
-      const defaults=['Jeu 1','Jeu 2','Jeu 3'];
-      for(let i=0;i<defaults.length;i++){await db.collection('games').add({name:defaults[i],order:i});}
-      const g2=await db.collection('games').orderBy('order').get();
-      games=g2.docs.map(d=>({id:d.id,...d.data()}));
+      const dg=['Jeu 1','Jeu 2','Jeu 3'];
+      for(let i=0;i<dg.length;i++) await db.collection('games').add({name:dg[i],order:i});
+      const g2 = await db.collection('games').orderBy('order').get();
+      games = g2.docs.map(d=>({id:d.id,...d.data()}));
     }
-    const aSnap=await db.collection('activities').orderBy('date','desc').get();
-    activities=aSnap.docs.map(d=>({id:d.id,...d.data()}));
     document.getElementById('sync-status').textContent='✓ Synchronisé';
     renderAll();
   }catch(e){
@@ -243,111 +255,157 @@ async function loadAll(){
 }
 
 function renderAll(){
-  renderStats();
-  renderCalendar();
-  renderActivityList();
-  renderStatsDetail();
-  renderGamesConfig();
+  renderStats(); renderCalendar(); renderActivityList();
+  renderStatsDetail(); renderGamesConfig(); renderPlayersConfig();
 }
 
-// ---- PAGES ----
-function showPage(name,btn){
+function showPage(n,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.botnav button').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  if(btn)btn.classList.add('active');
+  document.getElementById('page-'+n).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function selectMoment(m,btn){
+  selectedMoment=m;
+  document.querySelectorAll('.moment-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
 }
 
-// ---- MODAL ----
-function openModal(id){document.getElementById(id).classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
-
 function openNewActivity(){
-  const today=new Date().toISOString().split('T')[0];
-  document.getElementById('act-date').value=today;
+  document.getElementById('act-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('act-note').value='';
-  selectedGames={};
-  renderGameSelectList();
+  selectedMoment='soir';
+  document.querySelectorAll('.moment-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.moment-btn.soir').forEach(b=>b.classList.add('selected'));
+  selectedPlayers={};
+  playerGames={};
+  players.forEach(p=>{
+    if(p.default){ selectedPlayers[p.id]=true; playerGames[p.id]={}; }
+  });
+  renderPlayerSelectGrid();
+  renderPlayersGamesSection();
   openModal('modal-activity');
 }
 
-function renderGameSelectList(){
-  const el=document.getElementById('game-select-list');
-  if(games.length===0){el.innerHTML='<p style="font-size:13px;color:var(--muted)">Configurez d\'abord des jeux dans l\'onglet Jeux</p>';return;}
-  el.innerHTML=games.map(g=>`
-    <div class="game-select-item ${selectedGames[g.id]?'selected':''} ${selectedGames[g.id]&&selectedGames[g.id].final?'is-final':''}" id="gsi-${g.id}" onclick="toggleGameSelect('${g.id}')">
-      <span class="gname">${g.name}</span>
-      ${selectedGames[g.id]?`<button class="final-toggle ${selectedGames[g.id].final?'active':''}" onclick="event.stopPropagation();toggleFinal('${g.id}')">Final</button>`:''}
-    </div>
-  `).join('');
+function renderPlayerSelectGrid(){
+  const el=document.getElementById('player-select-grid');
+  if(players.length===0){
+    el.innerHTML='<p style="font-size:12px;color:var(--muted)">Configurez des joueurs d\'abord dans Config</p>';
+    return;
+  }
+  el.innerHTML=players.map(p=>`
+    <div class="player-chip ${selectedPlayers[p.id]?'selected':''}" onclick="togglePlayerSelect('${p.id}')">
+      ${p.default?'<span style="font-size:9px;color:var(--muted)">★</span>':''}
+      ${p.name}
+    </div>`).join('');
 }
 
-function toggleGameSelect(gid){
-  if(selectedGames[gid]){delete selectedGames[gid];}
-  else{selectedGames[gid]={final:false};}
-  renderGameSelectList();
+function togglePlayerSelect(pid){
+  if(selectedPlayers[pid]){ delete selectedPlayers[pid]; delete playerGames[pid]; }
+  else { selectedPlayers[pid]=true; playerGames[pid]={}; }
+  renderPlayerSelectGrid();
+  renderPlayersGamesSection();
 }
-function toggleFinal(gid){
-  const wasFinal=selectedGames[gid]&&selectedGames[gid].final;
-  // reset all finals
-  Object.keys(selectedGames).forEach(k=>{if(selectedGames[k])selectedGames[k].final=false;});
-  if(!wasFinal&&selectedGames[gid])selectedGames[gid].final=true;
-  renderGameSelectList();
+
+function renderPlayersGamesSection(){
+  const el=document.getElementById('players-games-section');
+  const activePids=Object.keys(selectedPlayers);
+  if(activePids.length===0){el.innerHTML='';return;}
+  el.innerHTML='<div style="margin-top:14px;font-size:12px;color:var(--muted);margin-bottom:6px">Jeux par joueur <span style="font-size:10px">(cochez + marquez "Final" pour chacun)</span></div>'+
+  activePids.map(pid=>{
+    const p=players.find(x=>x.id===pid);
+    if(!p) return '';
+    const initials=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    const pGames=playerGames[pid]||{};
+    const gamesHtml=games.map(g=>{
+      const isSel=!!pGames[g.id];
+      const isFinal=isSel&&pGames[g.id].final;
+      return`<div class="game-check-item ${isSel?'sel':''} ${isFinal?'is-final':''}" id="gci-${pid}-${g.id}" onclick="togglePlayerGame('${pid}','${g.id}')">
+        <div class="game-check-name">${g.name}</div>
+        ${isSel?`<button class="final-btn ${isFinal?'on':''}" onclick="event.stopPropagation();togglePlayerFinal('${pid}','${g.id}')">Final</button>`:''}
+      </div>`;
+    }).join('');
+    return`<div class="player-section">
+      <div class="player-section-name"><div class="psav">${initials}</div>${p.name}</div>
+      <div class="game-check-list">${gamesHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function togglePlayerGame(pid,gid){
+  if(!playerGames[pid]) playerGames[pid]={};
+  if(playerGames[pid][gid]) delete playerGames[pid][gid];
+  else playerGames[pid][gid]={final:false};
+  renderPlayersGamesSection();
+}
+
+function togglePlayerFinal(pid,gid){
+  if(!playerGames[pid]) return;
+  const wasFinal=playerGames[pid][gid]&&playerGames[pid][gid].final;
+  Object.keys(playerGames[pid]).forEach(k=>{ if(playerGames[pid][k]) playerGames[pid][k].final=false; });
+  if(!wasFinal&&playerGames[pid][gid]) playerGames[pid][gid].final=true;
+  renderPlayersGamesSection();
 }
 
 async function saveActivity(){
   const date=document.getElementById('act-date').value;
   const note=document.getElementById('act-note').value;
   if(!date){alert('Choisissez une date');return;}
-  const gamesPlayed=Object.entries(selectedGames).filter(([k,v])=>v).map(([gid,v])=>{
-    const g=games.find(x=>x.id===gid);
-    return{id:gid,name:g?g.name:'',final:v.final||false};
+  const activePids=Object.keys(selectedPlayers);
+  if(activePids.length===0){alert('Sélectionnez au moins un joueur');return;}
+  const playersData=activePids.map(pid=>{
+    const p=players.find(x=>x.id===pid);
+    const gamesPlayed=Object.entries(playerGames[pid]||{}).filter(([,v])=>v).map(([gid,v])=>{
+      const g=games.find(x=>x.id===gid);
+      return{id:gid,name:g?g.name:'',final:v.final||false};
+    });
+    return{id:pid,name:p?p.name:'',games:gamesPlayed};
   });
-  if(gamesPlayed.length===0){alert('Sélectionnez au moins un jeu');return;}
+  const allGames=playersData.flatMap(p=>p.games);
+  if(allGames.length===0){alert('Sélectionnez au moins un jeu pour un joueur');return;}
   try{
-    await db.collection('activities').add({date,note,games:gamesPlayed,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('activities').add({
+      date,note,moment:selectedMoment,
+      players:playersData,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
     closeModal('modal-activity');
     await loadAll();
-  }catch(e){alert('Erreur: '+e.message);}
+  }catch(e){alert('Erreur Firebase: '+e.message);}
 }
 
-// ---- STATS CARDS ----
 function renderStats(){
   const now=new Date();
   const total=activities.length;
-  const week=activities.filter(a=>{const d=new Date(a.date);const diff=(now-d)/(1000*60*60*24);return diff<=7&&diff>=0;}).length;
+  const week=activities.filter(a=>{const d=new Date(a.date);return(now-d)/(864e5)<=7&&(now-d)>=0;}).length;
   const month=activities.filter(a=>a.date&&a.date.startsWith(now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'))).length;
-  const year=activities.filter(a=>a.date&&a.date.startsWith(now.getFullYear()+'')).length;
-  const avgGames=total>0?Math.round((activities.reduce((s,a)=>s+(a.games?a.games.length:0),0)/total)*10)/10:0;
+  const year=activities.filter(a=>a.date&&a.date.startsWith(''+now.getFullYear())).length;
+  let totalGames=0,cnt=0;
+  activities.forEach(a=>{if(a.players){a.players.forEach(p=>{totalGames+=(p.games?p.games.length:0);});cnt++;}});
+  const avg=cnt>0?Math.round(totalGames/cnt*10)/10:0;
   document.getElementById('s-total').textContent=total;
   document.getElementById('s-week').textContent=week;
   document.getElementById('s-month').textContent=month;
   document.getElementById('s-year').textContent=year;
-  document.getElementById('s-avg').textContent=avgGames;
+  document.getElementById('s-avg').textContent=avg;
 }
 
-// ---- CALENDAR ----
 function renderCalendar(){
-  const names=['Lu','Ma','Me','Je','Ve','Sa','Di'];
-  const dnames=document.getElementById('cal-days-names');
-  dnames.innerHTML=names.map(n=>`<div class="cal-day-name">${n}</div>`).join('');
-
   const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
   document.getElementById('cal-month-label').textContent=months[calMonth]+' '+calYear;
-
+  const names=['Lu','Ma','Me','Je','Ve','Sa','Di'];
+  document.getElementById('cal-days-names').innerHTML=names.map(n=>`<div class="cal-day-name">${n}</div>`).join('');
   const activeDates=new Set(activities.map(a=>a.date));
   const today=new Date().toISOString().split('T')[0];
-
   const firstDay=new Date(calYear,calMonth,1);
-  let startDow=firstDay.getDay();if(startDow===0)startDow=7;// Mon=1
+  let startDow=firstDay.getDay(); if(startDow===0) startDow=7;
   const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   const daysInPrev=new Date(calYear,calMonth,0).getDate();
-
   let html='';
-  for(let i=startDow-1;i>0;i--){
-    const d=daysInPrev-i+1;
-    html+=`<div class="cal-day other-month">${d}</div>`;
-  }
+  for(let i=startDow-1;i>0;i--) html+=`<div class="cal-day other-month">${daysInPrev-i+1}</div>`;
   for(let d=1;d<=daysInMonth;d++){
     const ds=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const cls=ds===today?'today':activeDates.has(ds)?'has-activity':'';
@@ -359,24 +417,42 @@ function renderCalendar(){
 document.getElementById('cal-prev').onclick=()=>{calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCalendar();};
 document.getElementById('cal-next').onclick=()=>{calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCalendar();};
 
-// ---- ACTIVITY LIST ----
+const MOMENT_LABELS={
+  matin:{lbl:'Matin',cls:'badge-matin'},
+  aprem:{lbl:'Après-midi',cls:'badge-aprem'},
+  soir:{lbl:'Soir',cls:'badge-soir'},
+  nuit:{lbl:'Nuit',cls:'badge-nuit'}
+};
+
 function renderActivityList(){
   const el=document.getElementById('activity-list');
   if(activities.length===0){
-    el.innerHTML=`<div class="empty"><div class="empty-icon">🎲</div><p>Aucune activité encore.<br>Appuyez sur + pour commencer !</p></div>`;
+    el.innerHTML='<div class="empty"><p>Aucune activité encore.<br>Appuyez sur + pour commencer !</p></div>';
     return;
   }
   el.innerHTML=activities.map(a=>{
-    const gameHtml=(a.games||[]).map(g=>`<span class="game-pill ${g.final?'final':''}">${g.name}${g.final?' ★':''}</span>`).join('');
+    const m=a.moment&&MOMENT_LABELS[a.moment]?MOMENT_LABELS[a.moment]:{lbl:'',cls:''};
+    const momBadge=m.lbl?`<span class="moment-badge ${m.cls}">${m.lbl}</span>`:'';
+    const playersHtml=(a.players||[]).map(p=>{
+      const initials=p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      const gamesHtml=(p.games||[]).map(g=>`<span class="game-pill ${g.final?'final':''}">${g.name}${g.final?' ★':''}</span>`).join('');
+      return`<div class="player-row">
+        <div class="player-avatar">${initials}</div>
+        <div>
+          <div class="player-name-sm">${p.name}</div>
+          <div class="act-item-games">${gamesHtml||'<span style="font-size:10px;color:var(--muted)">aucun jeu</span>'}</div>
+        </div>
+      </div>`;
+    }).join('');
     return`<div class="act-item">
       <div class="act-item-header">
         <div>
-          <div class="act-item-date">${formatDate(a.date)}</div>
+          <div class="act-item-date">${formatDate(a.date)} ${momBadge}</div>
           <div class="act-item-title">${a.note||'Activité du '+formatDate(a.date)}</div>
         </div>
         <button class="delete-btn" onclick="deleteActivity('${a.id}')">🗑</button>
       </div>
-      <div class="act-item-games">${gameHtml}</div>
+      <div class="player-block">${playersHtml}</div>
     </div>`;
   }).join('');
 }
@@ -387,89 +463,83 @@ async function deleteActivity(id){
   await loadAll();
 }
 
-// ---- STATS DETAIL ----
 function renderStatsDetail(){
   const el=document.getElementById('stats-detail');
-  if(activities.length===0){el.innerHTML='<div class="empty"><div class="empty-icon">📊</div><p>Pas encore de données</p></div>';return;}
-
-  // game frequency
-  const freq={};
-  const finalCount={};
-  activities.forEach(a=>(a.games||[]).forEach(g=>{
-    freq[g.name]=(freq[g.name]||0)+1;
-    if(g.final)finalCount[g.name]=(finalCount[g.name]||0)+1;
-  }));
-
-  const maxFreq=Math.max(...Object.values(freq),1);
-  const freqRows=Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(([name,cnt])=>`
-    <div class="chart-row">
-      <div class="chart-label">${name}</div>
-      <div class="chart-bar-bg"><div class="chart-bar" style="width:${Math.round(cnt/maxFreq*100)}%"></div></div>
-      <div class="chart-val">${cnt}</div>
-    </div>`).join('');
-
-  const finalRows=Object.entries(finalCount).sort((a,b)=>b[1]-a[1]).map(([name,cnt])=>`
-    <div class="chart-row">
-      <div class="chart-label">${name}</div>
-      <div class="chart-bar-bg"><div class="chart-bar" style="width:${Math.round(cnt/activities.length*100)}%;background:var(--red)"></div></div>
-      <div class="chart-val">${cnt}</div>
-    </div>`).join('');
-
-  // % per activity
-  const totalGamePlays=Object.values(freq).reduce((s,v)=>s+v,0);
-  const pctRows=Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(([name,cnt])=>`
-    <div class="chart-row">
-      <div class="chart-label">${name}</div>
-      <div class="chart-bar-bg"><div class="chart-bar" style="width:${Math.round(cnt/totalGamePlays*100)}%;background:var(--rose4)"></div></div>
-      <div class="chart-val">${Math.round(cnt/totalGamePlays*100)}%</div>
-    </div>`).join('');
-
-  // par mois
+  if(activities.length===0){el.innerHTML='<div class="empty"><p>Pas encore de données</p></div>';return;}
+  const gameFreq={}, finalCount={}, playerFreq={}, momentFreq={matin:0,aprem:0,soir:0,nuit:0};
+  activities.forEach(a=>{
+    if(a.moment) momentFreq[a.moment]=(momentFreq[a.moment]||0)+1;
+    (a.players||[]).forEach(p=>{
+      playerFreq[p.name]=(playerFreq[p.name]||0)+1;
+      (p.games||[]).forEach(g=>{
+        gameFreq[g.name]=(gameFreq[g.name]||0)+1;
+        if(g.final) finalCount[g.name]=(finalCount[g.name]||0)+1;
+      });
+    });
+  });
+  const maxG=Math.max(...Object.values(gameFreq),1);
+  const maxP=Math.max(...Object.values(playerFreq),1);
+  const maxM=Math.max(...Object.values(momentFreq),1);
+  const totalGP=Object.values(gameFreq).reduce((s,v)=>s+v,0)||1;
+  const bar=(val,max,color)=>`<div class="chart-bar-bg"><div class="chart-bar" style="width:${Math.round(val/max*100)}%;${color?'background:'+color:''}"></div></div>`;
+  const rows=(entries,max,color,suffix)=>entries.sort((a,b)=>b[1]-a[1]).map(([n,c])=>
+    `<div class="chart-row"><div class="chart-label">${n}</div>${bar(c,max,color)}<div class="chart-val">${c}${suffix||''}</div></div>`).join('');
+  const freqRows=rows(Object.entries(gameFreq),maxG,'','');
+  const pctRows=rows(Object.entries(gameFreq).map(([n,c])=>[n,Math.round(c/totalGP*100)]),100,'var(--rose4)','%');
+  const finalRows=Object.keys(finalCount).length?rows(Object.entries(finalCount),activities.length,'var(--red)',''):'<p style="font-size:12px;color:var(--muted)">Aucun jeu final encore</p>';
+  const playerRows=rows(Object.entries(playerFreq),maxP,'var(--mid)','');
+  const mLabels={matin:'Matin',aprem:'Après-midi',soir:'Soir',nuit:'Nuit'};
+  const momentRows=rows(Object.entries(momentFreq).filter(([,c])=>c>0).map(([k,c])=>[mLabels[k],c]),maxM,'var(--mid)','');
   const byMonth={};
   activities.forEach(a=>{if(a.date){const m=a.date.substring(0,7);byMonth[m]=(byMonth[m]||0)+1;}});
-  const monthKeys=Object.keys(byMonth).sort().slice(-6);
-  const maxM=Math.max(...monthKeys.map(k=>byMonth[k]),1);
-  const monthRows=monthKeys.map(k=>`
-    <div class="chart-row">
-      <div class="chart-label">${k.substring(5)}/${k.substring(2,4)}</div>
-      <div class="chart-bar-bg"><div class="chart-bar" style="width:${Math.round(byMonth[k]/maxM*100)}%;background:var(--mid)"></div></div>
-      <div class="chart-val">${byMonth[k]}</div>
-    </div>`).join('');
-
-  el.innerHTML=`
-    <div class="stat-card" style="margin-bottom:16px">
-      <div class="lbl" style="margin-bottom:8px;font-weight:500;color:var(--dark)">Fréquence des jeux</div>
-      <div class="chart-bar-wrap">${freqRows||'<p style="font-size:13px;color:var(--muted)">–</p>'}</div>
-    </div>
-    <div class="stat-card" style="margin-bottom:16px">
-      <div class="lbl" style="margin-bottom:8px;font-weight:500;color:var(--dark)">Part de chaque jeu (%)</div>
-      <div class="chart-bar-wrap">${pctRows||'–'}</div>
-    </div>
-    <div class="stat-card" style="margin-bottom:16px">
-      <div class="lbl" style="margin-bottom:8px;font-weight:500;color:var(--dark)">Jeu final le plus souvent</div>
-      <div class="chart-bar-wrap">${finalRows||'<p style="font-size:13px;color:var(--muted)">Aucun jeu final encore</p>'}</div>
-    </div>
-    <div class="stat-card" style="margin-bottom:16px">
-      <div class="lbl" style="margin-bottom:8px;font-weight:500;color:var(--dark)">Activités par mois (6 derniers)</div>
-      <div class="chart-bar-wrap">${monthRows||'–'}</div>
-    </div>`;
+  const mk=Object.keys(byMonth).sort().slice(-6);
+  const maxMo=Math.max(...mk.map(k=>byMonth[k]),1);
+  const monthRows=mk.map(k=>`<div class="chart-row"><div class="chart-label">${k.substring(5)}/${k.substring(2,4)}</div>${bar(byMonth[k],maxMo,'var(--mid)')}<div class="chart-val">${byMonth[k]}</div></div>`).join('');
+  const card=(title,content)=>`<div class="stat-card wide" style="margin-bottom:12px"><div class="lbl" style="font-weight:500;color:var(--dark);font-size:13px;margin-bottom:10px">${title}</div><div class="chart-bar-wrap">${content}</div></div>`;
+  el.innerHTML=
+    card('Fréquence des jeux',freqRows||'–')+
+    card('Part de chaque jeu (%)',pctRows||'–')+
+    card('Jeu final le plus souvent',finalRows)+
+    card('Participations par joueur',playerRows||'–')+
+    card('Moment de la journée',momentRows||'–')+
+    card('Activités par mois (6 derniers)',monthRows||'–');
 }
 
-// ---- GAMES CONFIG ----
 function renderGamesConfig(){
-  const el=document.getElementById('games-list');
-  el.innerHTML=games.map((g,i)=>`
+  document.getElementById('games-list').innerHTML=games.map(g=>`
     <div class="game-config-item">
       <input type="text" value="${g.name}" id="gname-${g.id}" placeholder="Nom du jeu">
-      <button class="remove-game" onclick="removeGame('${g.id}')">×</button>
+      <button class="remove-btn" onclick="removeGame('${g.id}')">×</button>
     </div>`).join('');
+}
+
+function renderPlayersConfig(){
+  document.getElementById('players-list').innerHTML=players.map(p=>`
+    <div class="player-config-item">
+      <input type="text" value="${p.name}" id="pname-${p.id}" placeholder="Nom du joueur">
+      <button class="default-toggle ${p.default?'on':''}" id="pdef-${p.id}" onclick="togglePlayerDefault('${p.id}')">Par défaut</button>
+      <button class="remove-btn" onclick="removePlayer('${p.id}')">×</button>
+    </div>`).join('');
+}
+
+function togglePlayerDefault(pid){
+  const p=players.find(x=>x.id===pid);
+  if(p) p.default=!p.default;
+  renderPlayersConfig();
 }
 
 document.getElementById('add-game-btn').onclick=()=>{
-  const tempId='new_'+Date.now();
-  games.push({id:tempId,name:'',order:games.length});
+  const tid='new_'+Date.now();
+  games.push({id:tid,name:'',order:games.length});
   renderGamesConfig();
-  document.getElementById('gname-'+tempId).focus();
+  document.getElementById('gname-'+tid).focus();
+};
+
+document.getElementById('add-player-btn').onclick=()=>{
+  const tid='new_'+Date.now();
+  players.push({id:tid,name:'',order:players.length,default:false});
+  renderPlayersConfig();
+  document.getElementById('pname-'+tid).focus();
 };
 
 async function removeGame(id){
@@ -479,31 +549,43 @@ async function removeGame(id){
   await loadAll();
 }
 
-document.getElementById('save-games-btn').onclick=async()=>{
+async function removePlayer(id){
+  if(!confirm('Supprimer ce joueur ?'))return;
+  if(id.startsWith('new_')){players=players.filter(p=>p.id!==id);renderPlayersConfig();return;}
+  await db.collection('players').doc(id).delete();
+  await loadAll();
+}
+
+document.getElementById('save-config-btn').onclick=async()=>{
   try{
     const batch=db.batch();
     for(let i=0;i<games.length;i++){
       const g=games[i];
-      const nameEl=document.getElementById('gname-'+g.id);
-      if(!nameEl)continue;
-      const name=nameEl.value.trim();
-      if(!name)continue;
-      if(g.id.startsWith('new_')){
-        const ref=db.collection('games').doc();
-        batch.set(ref,{name,order:i});
-      }else{
-        batch.update(db.collection('games').doc(g.id),{name,order:i});
-      }
+      const el=document.getElementById('gname-'+g.id);
+      if(!el) continue;
+      const name=el.value.trim();
+      if(!name) continue;
+      if(g.id.startsWith('new_')) batch.set(db.collection('games').doc(),{name,order:i});
+      else batch.update(db.collection('games').doc(g.id),{name,order:i});
+    }
+    for(let i=0;i<players.length;i++){
+      const p=players[i];
+      const el=document.getElementById('pname-'+p.id);
+      if(!el) continue;
+      const name=el.value.trim();
+      if(!name) continue;
+      const isDefault=p.default||false;
+      if(p.id.startsWith('new_')) batch.set(db.collection('players').doc(),{name,order:i,default:isDefault});
+      else batch.update(db.collection('players').doc(p.id),{name,order:i,default:isDefault});
     }
     await batch.commit();
-    document.getElementById('sync-status').textContent='✓ Jeux sauvegardés';
+    document.getElementById('sync-status').textContent='✓ Config sauvegardée';
     await loadAll();
   }catch(e){alert('Erreur: '+e.message);}
 };
 
-// ---- UTILS ----
 function formatDate(ds){
-  if(!ds)return'';
+  if(!ds) return '';
   const [y,m,d]=ds.split('-');
   return d+'/'+m+'/'+y;
 }
