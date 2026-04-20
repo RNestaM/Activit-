@@ -330,6 +330,8 @@ function openEditActivity(id){
   renderPlayersGamesSection();
   openModal('modal-activity');
 }
+
+function renderPlayerSelectGrid(){
   const el=document.getElementById('player-select-grid');
   if(players.length===0){
     el.innerHTML='<p style="font-size:12px;color:var(--muted)">Configurez des joueurs d\'abord dans Config</p>';
